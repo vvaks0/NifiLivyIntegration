@@ -43,7 +43,7 @@ import org.codehaus.jettison.json.JSONObject;
 import com.hortonworks.nifi.controller.api.LivySessionService;
 
 @SideEffectFree
-@Tags({"Druid","Timeseries","OLAP"})
+@Tags({"Spark","Livy","HTTP"})
 @CapabilityDescription("Sends events to Apache Druid for Indexing")
 public class ExecuteSparkInteractive extends AbstractProcessor {
 	private List<PropertyDescriptor> properties;
@@ -92,7 +92,7 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 	public void onTrigger(ProcessContext context, final ProcessSession session) throws ProcessException {
 		//ProvenanceReporter provRep = session.getProvenanceReporter();
 		
-		Map<Integer,Object> livyController = (Map<Integer, Object>) context.getProperty(LIVY_CONTROLLER_SERVICE).asControllerService(LivySessionService.class);
+		Map<String, String> livyController = (Map<String,String>) context.getProperty(LIVY_CONTROLLER_SERVICE).asControllerService(LivySessionService.class).getSession();
 		
         final FlowFile flowFile = session.get();
         if (flowFile == null || flowFile.getSize() == 0) {
