@@ -92,7 +92,7 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 	public void onTrigger(ProcessContext context, final ProcessSession session) throws ProcessException {
 		//ProvenanceReporter provRep = session.getProvenanceReporter();
 		
-		Map<Integer,Object> livyController = (Map<Integer, Object>) context.getProperty(LIVY_CONTROLLER_SERVICE).asControllerService();
+		Map<Integer,Object> livyController = (Map<Integer, Object>) context.getProperty(LIVY_CONTROLLER_SERVICE).asControllerService(LivySessionService.class);
 		
         final FlowFile flowFile = session.get();
         if (flowFile == null || flowFile.getSize() == 0) {
