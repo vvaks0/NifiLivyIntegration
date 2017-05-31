@@ -215,7 +215,7 @@ public class LivySessionController extends AbstractControllerService implements 
 				}
 			}
 			
-			getLogger().debug("********** manageSessions() updated map of sessions: " + sessions);
+			getLogger().debug("********** manageSessions() Updated map of sessions: " + sessions);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -259,6 +259,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			getLogger().debug("********** openSession() Created new sessions: " + newSessionInfo);
 			while(!newSessionInfo.getString("state").equalsIgnoreCase("idle")){
 				getLogger().debug("********** openSession() Wating for session to start...");
+				newSessionInfo = readJSONObjectFromUrlPOST(sessionsUrl, headers, payload);
 				Thread.sleep(1000);
 			}
 		} catch (IOException e) {
