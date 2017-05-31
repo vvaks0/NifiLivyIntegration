@@ -190,27 +190,24 @@ public class LivySessionController extends AbstractControllerService implements 
 				getLogger().debug("********** manageSessions() There are no available sessions, creating...");
 				for(int i=0; i<sessionPoolSize; i++){
 					newSessionInfo = openSession();
-					System.out.println(newSessionInfo);
-					sessions.put(	newSessionInfo.getJSONArray("sessions").getJSONObject(0).getInt("id"), 
-									newSessionInfo.getJSONArray("sessions").getJSONObject(0));
+					sessions.put(newSessionInfo.getInt("id"), newSessionInfo);
+					getLogger().debug("********** manageSessions() Registered new session: " + newSessionInfo);
 				}
 			}else{
 				//Open one new session if there are no idle sessions
 				getLogger().debug("********** manageSessions() There are no idle sessions, creating...");
 				if(idleSessions==0){
 					newSessionInfo = openSession();
-					System.out.println(newSessionInfo);
-					sessions.put(	newSessionInfo.getJSONArray("sessions").getJSONObject(0).getInt("id"), 
-									newSessionInfo.getJSONArray("sessions").getJSONObject(0));
+					sessions.put(newSessionInfo.getInt("id"), newSessionInfo);
+					getLogger().debug("********** manageSessions() Registered new session: " + newSessionInfo);
 				}
 				//Open more sessions if number of sessions is less than target pool size
 				getLogger().debug("********** manageSessions() Need more sessions to equal requested pool size, creating...");
 				if(numSessions < sessionPoolSize){
 					for(int i=0; i<sessionPoolSize-numSessions; i++){
 						newSessionInfo = openSession();
-						System.out.println(newSessionInfo);
-						sessions.put(	newSessionInfo.getJSONArray("sessions").getJSONObject(0).getInt("id"), 
-										newSessionInfo.getJSONArray("sessions").getJSONObject(0));
+						sessions.put(newSessionInfo.getInt("id"), newSessionInfo);
+						getLogger().debug("********** manageSessions() Registered new session: " + newSessionInfo);
 					}
 				}
 			}
