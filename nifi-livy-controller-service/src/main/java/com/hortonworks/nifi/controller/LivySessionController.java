@@ -122,6 +122,11 @@ public class LivySessionController extends AbstractControllerService implements 
 	        public void run(){
 	            while(true){
 	            	manageSessions();
+	            	try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 	            }
 	        }
 	    }).start();
@@ -129,6 +134,8 @@ public class LivySessionController extends AbstractControllerService implements 
 	
 	public Map<String,String> getSession(){
 		Map<String,String> sessionMap = new HashMap<String,String>();
+		getLogger().debug("********** getSession() Aquiring session...");
+		getLogger().debug("********** getSession() Session Cache: " + sessions);
 		try {
 			for(int sessionId: sessions.keySet()){
 				JSONObject currentSession = (JSONObject)sessions.get(sessionId);
@@ -141,32 +148,46 @@ public class LivySessionController extends AbstractControllerService implements 
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+		getLogger().debug("********** getSession() Returning idle sessions: " + sessionMap);
 		return sessionMap;
 	}
 	
 	private void manageSessions(){
 		int idleSessions=0;
 		JSONObject newSessionInfo = null;
-		List<JSONObject> sessionsInfo = null;
+		Map<Integer,JSONObject> sessionsInfo = null;
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", "application/json");
 		headers.put("X-Requested-By", "user");
-		Map<Integer,Object> sessions = new HashMap<Integer,Object>();
 		
-		sessions.clear();
 		try {
+			getLogger().debug("********** manageSessions() aquiring list of sessions...");
 			sessionsInfo = listSessions();			
 			for(int sessionId: sessions.keySet()){
 				JSONObject currentSession = (JSONObject)sessions.get(sessionId);
-				String state = currentSession.getString("state");
-				if(state.equalsIgnoreCase("idle")){
-					idleSessions++;
+				if(sessionsInfo.containsKey(sessionId)){	
+					getLogger().debug("********** manageSessions() updating current session: " + currentSession);
+					String state = currentSession.getString("state");
+					if(state.equalsIgnoreCase("idle")){
+						//Keep track of how many sessions are in an idle state and thus available
+						idleSessions++;
+						sessions.put(sessionId,sessionsInfo.get(sessionId));
+					}else if(state.equalsIgnoreCase("busy")||state.equalsIgnoreCase("starting")){
+						//Update status of existing sessions
+						sessions.put(sessionId,sessionsInfo.get(sessionId));
+					}else{
+						//Prune sessions whose state is: not_started, shutting_down, error, dead, success (successfully stopped)
+						sessions.remove(sessionId);
+					}
+				}else{
+					//Prune sessions that no longer exist
+					sessions.remove(sessionId);
 				}
 			}
 			int numSessions = sessionsInfo.size();
 			//Open new sessions equal to the number requested by session_pool_size
 			if(numSessions==0){
+				getLogger().debug("********** manageSessions() There are no available sessions, creating...");
 				for(int i=0; i>sessionPoolSize; i++){
 					newSessionInfo = openSession();
 					System.out.println(newSessionInfo);
@@ -175,6 +196,7 @@ public class LivySessionController extends AbstractControllerService implements 
 				}
 			}else{
 				//Open one new session if there are no idle sessions
+				getLogger().debug("********** manageSessions() There are no idle sessions, creating...");
 				if(idleSessions==0){
 					newSessionInfo = openSession();
 					System.out.println(newSessionInfo);
@@ -182,6 +204,7 @@ public class LivySessionController extends AbstractControllerService implements 
 									newSessionInfo.getJSONArray("sessions").getJSONObject(0));
 				}
 				//Open more sessions if number of sessions is less than target pool size
+				getLogger().debug("********** manageSessions() Need more sessions to equal requested pool size, creating...");
 				if(numSessions < sessionPoolSize){
 					for(int i=0; i<sessionPoolSize-numSessions; i++){
 						newSessionInfo = openSession();
@@ -190,34 +213,29 @@ public class LivySessionController extends AbstractControllerService implements 
 										newSessionInfo.getJSONArray("sessions").getJSONObject(0));
 					}
 				}
-				//Add existing sessions to sessions map
-				Iterator<JSONObject> sessionIterator = sessionsInfo.iterator();
-				while(sessionIterator.hasNext()){
-					JSONObject currentSession = sessionIterator.next(); 
-					sessions.put(currentSession.getInt("id"), currentSession);
-				}
 			}
 			
-			System.out.println(sessions);
+			getLogger().debug("********** manageSessions() updated map of sessions: " + sessions);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private List<JSONObject> listSessions(){
+	private Map<Integer,JSONObject> listSessions(){
 		String sessionsUrl = livyUrl+"/sessions";
 		int numSessions = 0;
 		JSONObject sessionsInfo = null;
-		List<JSONObject> sessionsList = new ArrayList<JSONObject>();
+		Map<Integer,JSONObject> sessionsMap = new HashMap<Integer,JSONObject>();
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", "application/json");
 		headers.put("X-Requested-By", "user");
 		try {
 			sessionsInfo = readJSONFromUrl(sessionsUrl, headers);
 			numSessions = sessionsInfo.getInt("total");
-			for(int i=0;i>numSessions; i++){
-				System.out.println(sessionsInfo);
-				sessionsList.add(sessionsInfo);
+			for(int i=0;i<=numSessions; i++){
+				int currentSessionId = sessionsInfo.getJSONArray("sessions").getJSONObject(i).getInt("id");
+				JSONObject currentSession = sessionsInfo.getJSONArray("sessions").getJSONObject(i);
+				sessionsMap.put(currentSessionId,currentSession);
 			}	
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -225,7 +243,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			e.printStackTrace();
 		}
 		
-		return sessionsList;
+		return sessionsMap;
 	}
 	
 	private JSONObject openSession(){
@@ -238,9 +256,9 @@ public class LivySessionController extends AbstractControllerService implements 
 		
 		try {
 			newSessionInfo = readJSONObjectFromUrlPOST(sessionsUrl, headers, payload);
-			System.out.println(newSessionInfo);
+			getLogger().debug("********** openSession() Created new sessions: " + newSessionInfo);
 			while(!newSessionInfo.getString("state").equalsIgnoreCase("idle")){
-				System.out.println("wating for session to start...");
+				getLogger().debug("********** openSession() Wating for session to start...");
 				Thread.sleep(1000);
 			}
 		} catch (IOException e) {
