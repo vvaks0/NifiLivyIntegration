@@ -149,21 +149,22 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 			statementUrl = statementUrl+"/"+statementId;
 			jobInfo = readJSONObjectFromUrl(statementUrl, headers);
 			String jobState = jobInfo.getString("state"); 
+			
 			getLogger().debug("********** submitAndHandleJob() New Job Info: "+jobInfo);
-			if(jobState.equalsIgnoreCase("running") || jobState.equalsIgnoreCase("waiting")){
-				while(jobState.equalsIgnoreCase("running")){
+			Thread.sleep(1000);
+			if(jobState.equalsIgnoreCase("available")){
+				getLogger().debug("********** submitAndHandleJob() Job status is: "+jobState+". returning output...");
+				output = jobInfo.getJSONObject("output").getJSONObject("data");
+			}else if(jobState.equalsIgnoreCase("running") || jobState.equalsIgnoreCase("waiting")){
+				while(!jobState.equalsIgnoreCase("available")){
 					getLogger().debug("********** submitAndHandleJob() Job status is: "+jobState+". Wating for job to complete...");
 					Thread.sleep(1000);
 					jobInfo = readJSONObjectFromUrl(statementUrl, headers);
 					jobState = jobInfo.getString("state"); 
 				}
-			}
-			
-			if(jobState.equalsIgnoreCase("error") || jobState.equalsIgnoreCase("cancelled") || jobState.equalsIgnoreCase("cancelling")){
-				getLogger().debug("********** Job status is: "+jobState+". Job did not complete due to error or has been cancelled. Check SparkUI for details.");
-			}else if(jobState.equalsIgnoreCase("available")){
-				getLogger().debug("********** Job status is: "+jobState+". Getting output...");
 				output = jobInfo.getJSONObject("output").getJSONObject("data");
+			}else if(jobState.equalsIgnoreCase("error") || jobState.equalsIgnoreCase("cancelled") || jobState.equalsIgnoreCase("cancelling")){
+				getLogger().debug("********** Job status is: "+jobState+". Job did not complete due to error or has been cancelled. Check SparkUI for details.");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -173,10 +174,6 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 			e.printStackTrace();
 		}
 		return output;
-	}
-	
-	private JSONObject getJobStatus(){
-		return null;
 	}
 	
 	private JSONObject readJSONObjectFromUrlPOST(String urlString, Map<String,String> headers, String payload) throws IOException, JSONException {
