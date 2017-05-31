@@ -140,9 +140,11 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 		headers.put("Content-Type", "application/json");
 		headers.put("X-Requested-By", "user");
 		
-		getLogger().debug("********** submitAndHandleJob() Submitting Job to Spark...");
+		getLogger().debug("********** submitAndHandleJob() Submitting Job to Spark via: " + statementUrl);
+		getLogger().debug("********** submitAndHandleJob() Job payload: " + payload);
 		try {
 			JSONObject jobInfo = readJSONObjectFromUrlPOST(statementUrl, headers, payload);
+			getLogger().debug("********** submitAndHandleJob() Job Info: " + jobInfo);
 			String statementId = String.valueOf(jobInfo.getInt("id"));
 			statementUrl = statementUrl+statementId;
 			jobInfo = readJSONObjectFromUrl(statementUrl, headers);
