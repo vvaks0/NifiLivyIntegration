@@ -101,7 +101,7 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 		Map<String, String> livyController = (Map<String,String>) context.getProperty(LIVY_CONTROLLER_SERVICE).asControllerService(LivySessionService.class).getSession();
 		
         FlowFile flowFile = session.get();
-        if (flowFile == null || flowFile.getSize() == 0) {
+        if (flowFile == null) {
         	session.remove(flowFile);
         	return;
         }else{

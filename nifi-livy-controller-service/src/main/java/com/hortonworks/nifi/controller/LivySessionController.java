@@ -200,10 +200,10 @@ public class LivySessionController extends AbstractControllerService implements 
 				sessions.put(sessionId,sessionsInfo.get(sessionId));
 			}
 			
-			int numSessions = sessionsInfo.size();
+			int numSessions = sessions.size();
 			//Open new sessions equal to the number requested by session_pool_size
 			if(numSessions==0){
-				getLogger().debug("********** manageSessions() There are no available sessions, creating...");
+				getLogger().debug("********** manageSessions() There are " + numSessions+ " sessions in the pool, creating...");
 				for(int i=0; i<sessionPoolSize; i++){
 					newSessionInfo = openSession();
 					sessions.put(newSessionInfo.getInt("id"), newSessionInfo);
@@ -212,14 +212,14 @@ public class LivySessionController extends AbstractControllerService implements 
 			}else{
 				//Open one new session if there are no idle sessions
 				if(idleSessions==0){
-					getLogger().debug("********** manageSessions() There are no idle sessions, creating...");
+					getLogger().debug("********** manageSessions() There are " + numSessions+ " sessions in the pool but none of them are idle sessions, creating...");
 					newSessionInfo = openSession();
 					sessions.put(newSessionInfo.getInt("id"), newSessionInfo);
 					getLogger().debug("********** manageSessions() Registered new session: " + newSessionInfo);
 				}
 				//Open more sessions if number of sessions is less than target pool size
 				if(numSessions < sessionPoolSize){
-					getLogger().debug("********** manageSessions() Need more sessions to equal requested pool size, creating...");
+					getLogger().debug("********** manageSessions() There are " + numSessions+ ", need more sessions to equal requested pool size of "+sessionPoolSize+", creating...");
 					for(int i=0; i<sessionPoolSize-numSessions; i++){
 						newSessionInfo = openSession();
 						sessions.put(newSessionInfo.getInt("id"), newSessionInfo);
@@ -288,7 +288,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		try {
 			newSessionInfo = readJSONObjectFromUrlPOST(sessionsUrl, headers, payload);
 			getLogger().debug("********** openSession() Created new sessions: " + newSessionInfo);
-			Thread.sleep(500);
+			Thread.sleep(1000);
 			while(!newSessionInfo.getString("state").equalsIgnoreCase("idle")){
 				getLogger().debug("********** openSession() Wating for session to start...");
 				newSessionInfo = getSessionInfo(newSessionInfo.getInt("id"));
