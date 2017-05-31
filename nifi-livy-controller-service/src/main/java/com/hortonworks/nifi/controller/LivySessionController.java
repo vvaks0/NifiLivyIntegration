@@ -195,15 +195,15 @@ public class LivySessionController extends AbstractControllerService implements 
 				}
 			}else{
 				//Open one new session if there are no idle sessions
-				getLogger().debug("********** manageSessions() There are no idle sessions, creating...");
 				if(idleSessions==0){
+					getLogger().debug("********** manageSessions() There are no idle sessions, creating...");
 					newSessionInfo = openSession();
 					sessions.put(newSessionInfo.getInt("id"), newSessionInfo);
 					getLogger().debug("********** manageSessions() Registered new session: " + newSessionInfo);
 				}
 				//Open more sessions if number of sessions is less than target pool size
-				getLogger().debug("********** manageSessions() Need more sessions to equal requested pool size, creating...");
 				if(numSessions < sessionPoolSize){
+					getLogger().debug("********** manageSessions() Need more sessions to equal requested pool size, creating...");
 					for(int i=0; i<sessionPoolSize-numSessions; i++){
 						newSessionInfo = openSession();
 						sessions.put(newSessionInfo.getInt("id"), newSessionInfo);
