@@ -134,7 +134,7 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 	}
 	
 	private JSONObject submitAndHandleJob(String livyUrl, String sessionId, String payload){
-		String statementUrl = livyUrl+"/sessions/"+sessionId+"/statements/";
+		String statementUrl = livyUrl+"/sessions/"+sessionId+"/statements";
 		JSONObject output = null;
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", "application/json");
@@ -146,7 +146,7 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 			JSONObject jobInfo = readJSONObjectFromUrlPOST(statementUrl, headers, payload);
 			getLogger().debug("********** submitAndHandleJob() Job Info: " + jobInfo);
 			String statementId = String.valueOf(jobInfo.getInt("id"));
-			statementUrl = statementUrl+statementId;
+			statementUrl = statementUrl+"/"+statementId;
 			jobInfo = readJSONObjectFromUrl(statementUrl, headers);
 			String jobState = jobInfo.getString("state"); 
 			getLogger().debug("********** submitAndHandleJob() New Job Info: "+jobInfo);
