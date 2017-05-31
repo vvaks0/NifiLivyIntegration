@@ -278,6 +278,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			while(!newSessionInfo.getString("state").equalsIgnoreCase("idle")){
 				getLogger().debug("********** openSession() Wating for session to start...");
 				newSessionInfo = getSessionInfo(newSessionInfo.getInt("id"));
+				getLogger().debug("********** openSession() newSessionInfo: " + newSessionInfo);
 				Thread.sleep(1000);
 			}
 		} catch (IOException e) {
