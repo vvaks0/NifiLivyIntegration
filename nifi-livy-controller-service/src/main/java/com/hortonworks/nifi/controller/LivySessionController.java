@@ -37,7 +37,7 @@ public class LivySessionController extends AbstractControllerService implements 
 	private String livyUrl;
 	private int sessionPoolSize;
 	private String sessionKind;
-	private Map<Integer, Object> sessions = new HashMap<Integer,Object>();
+	private Map<Integer, JSONObject> sessions = new HashMap<Integer,JSONObject>();
     
 	public static final PropertyDescriptor LIVY_HOST = new PropertyDescriptor.Builder()
             .name("livy_host")
@@ -84,7 +84,7 @@ public class LivySessionController extends AbstractControllerService implements 
             //.addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
 	
-	 private static final List<PropertyDescriptor> properties;
+	private static final List<PropertyDescriptor> properties;
 	
 	static{
 		final List<PropertyDescriptor> props = new ArrayList<>();
@@ -162,7 +162,10 @@ public class LivySessionController extends AbstractControllerService implements 
 		
 		try {
 			getLogger().debug("********** manageSessions() aquiring list of sessions...");
-			sessionsInfo = listSessions();			
+			sessionsInfo = listSessions();
+			if(sessions.isEmpty()){
+				sessions = sessionsInfo;
+			}
 			for(int sessionId: sessions.keySet()){
 				JSONObject currentSession = (JSONObject)sessions.get(sessionId);
 				if(sessionsInfo.containsKey(sessionId)){	
