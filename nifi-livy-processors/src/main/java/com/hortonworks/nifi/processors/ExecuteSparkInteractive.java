@@ -102,7 +102,7 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 		
         FlowFile flowFile = session.get();
         if (flowFile == null) {
-        	session.remove(flowFile);
+        	//session.remove(flowFile);
         	return;
         }else{
         	final byte[] buffer = new byte[(int) flowFile.getSize()];
