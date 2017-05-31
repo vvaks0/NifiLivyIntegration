@@ -196,7 +196,7 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
     		os.write(payload.getBytes());
     		os.flush();
             
-            if (connection.getResponseCode() != 200 || connection.getResponseCode() != 201){
+            if (connection.getResponseCode() != 200 && connection.getResponseCode() != 201){
     			throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode() + " : " + connection.getResponseMessage());
     		}
             
