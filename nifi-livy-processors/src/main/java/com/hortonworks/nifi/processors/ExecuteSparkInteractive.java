@@ -62,10 +62,10 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 	        .description("Succes relationship")
 	        .build();
 	
-	public static final Relationship REL_ORIGINAL = new Relationship.Builder()
+	/*public static final Relationship REL_ORIGINAL = new Relationship.Builder()
 	        .name("ORIGINAL")
 	        .description("Original flowfile relationship")
-	        .build();
+	        .build();*/
 	
     public static final Relationship REL_FAIL = new Relationship.Builder()
             .name("FAIL")
@@ -79,7 +79,7 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 		
 	    Set<Relationship> relationships = new HashSet<Relationship>();
 	    relationships.add(REL_SUCCESS);
-	    relationships.add(REL_ORIGINAL);
+	    //relationships.add(REL_ORIGINAL);
 	    relationships.add(REL_FAIL);
 	    this.relationships = Collections.unmodifiableSet(relationships);
 	}
@@ -125,11 +125,13 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
                 		out.write(result.toString().getBytes());
                 	}
         		});
+        		//flowFile = session.putAllAttributes(flowFile, (Map<String, String>) new ArrayList());\
         		session.transfer(resultFlowFile, REL_SUCCESS);
-        		session.transfer(flowFile, REL_ORIGINAL);
         	}
+        	
         }
-		//flowFile = session.putAllAttributes(flowFile, (Map<String, String>) new ArrayList());\
+        session.remove(flowFile);
+        session.commit(); 
 	}
 	
 	private JSONObject submitAndHandleJob(String livyUrl, String sessionId, String payload){
