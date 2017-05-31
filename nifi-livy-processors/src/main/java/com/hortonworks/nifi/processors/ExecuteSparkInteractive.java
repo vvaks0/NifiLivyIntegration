@@ -100,9 +100,10 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 		
 		Map<String, String> livyController = (Map<String,String>) context.getProperty(LIVY_CONTROLLER_SERVICE).asControllerService(LivySessionService.class).getSession();
 		
-        final FlowFile flowFile = session.get();
+        FlowFile flowFile = session.get();
         if (flowFile == null || flowFile.getSize() == 0) {
-            return;
+        	session.remove(flowFile);
+        	return;
         }else{
         	final byte[] buffer = new byte[(int) flowFile.getSize()];
         	session.read(flowFile, new InputStreamCallback() {
@@ -116,21 +117,19 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
         	String livyUrl = livyController.get("livyUrl").toString();
         	String payload = "{\"code\":\""+flowFile.getAttribute("code")+"\"}";
         	JSONObject result = submitAndHandleJob(livyUrl,sessionId,payload);
-        
+        	getLogger().debug("********** ExecuteSparkInteractive Resutl of Job Submit: " + result);
         	if(result==null){
         		session.transfer(flowFile, REL_FAIL);
         	}else{
-        		FlowFile resultFlowFile = session.write(flowFile, new OutputStreamCallback() {
+        		flowFile = session.write(flowFile, new OutputStreamCallback() {
                 	public void process(OutputStream out) throws IOException {
                 		out.write(result.toString().getBytes());
                 	}
         		});
         		//flowFile = session.putAllAttributes(flowFile, (Map<String, String>) new ArrayList());\
-        		session.transfer(resultFlowFile, REL_SUCCESS);
+        		session.transfer(flowFile, REL_SUCCESS);
         	}
-        	
         }
-        session.remove(flowFile);
         session.commit(); 
 	}
 	
@@ -140,17 +139,18 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", "application/json");
 		headers.put("X-Requested-By", "user");
-			
+		
+		getLogger().debug("********** submitAndHandleJob() Submitting Job to Spark...");
 		try {
 			JSONObject jobInfo = readJSONObjectFromUrlPOST(sessionUrl, headers, payload);
-			System.out.println(jobInfo);
 			String statementId = String.valueOf(jobInfo.getInt("id"));
 			String statementUrl = livyUrl+"/sessions/"+sessionId+"/statements/"+statementId;
 			jobInfo = readJSONObjectFromUrl(statementUrl, headers);
 			String jobState = jobInfo.getString("state"); 
+			getLogger().debug("********** submitAndHandleJob() New Job Info: "+jobInfo);
 			if(jobState.equalsIgnoreCase("running") || jobState.equalsIgnoreCase("waiting")){
 				while(jobState.equalsIgnoreCase("running")){
-					System.out.println("Job status is: "+jobState+". Wating for job to complete...");
+					getLogger().debug("********** submitAndHandleJob() Job status is: "+jobState+". Wating for job to complete...");
 					Thread.sleep(1000);
 					jobInfo = readJSONObjectFromUrl(sessionUrl, headers);
 					jobState = jobInfo.getString("state"); 
@@ -158,9 +158,9 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 			}
 			
 			if(jobState.equalsIgnoreCase("error") || jobState.equalsIgnoreCase("cancelled") || jobState.equalsIgnoreCase("cancelling")){
-				System.out.println("Job status is: "+jobState+". Job did not complete due to error or has been cancelled. Check SparkUI for details.");
+				getLogger().debug("********** Job status is: "+jobState+". Job did not complete due to error or has been cancelled. Check SparkUI for details.");
 			}else if(jobState.equalsIgnoreCase("available")){
-				System.out.println("Job status is: "+jobState+". Getting output...");
+				getLogger().debug("********** Job status is: "+jobState+". Getting output...");
 				output = jobInfo.getJSONObject("output").getJSONObject("data");
 			}
 		} catch (IOException e) {
