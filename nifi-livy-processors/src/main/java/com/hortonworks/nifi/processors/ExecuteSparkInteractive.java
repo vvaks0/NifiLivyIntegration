@@ -62,6 +62,11 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 	        .description("Succes relationship")
 	        .build();
 	
+	public static final Relationship REL_ORIGINAL = new Relationship.Builder()
+	        .name("ORIGINAL")
+	        .description("Original flowfile relationship")
+	        .build();
+	
     public static final Relationship REL_FAIL = new Relationship.Builder()
             .name("FAIL")
             .description("FlowFiles are routed to this relationship when they cannot be parsed")
@@ -74,6 +79,7 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
 		
 	    Set<Relationship> relationships = new HashSet<Relationship>();
 	    relationships.add(REL_SUCCESS);
+	    relationships.add(REL_ORIGINAL);
 	    relationships.add(REL_FAIL);
 	    this.relationships = Collections.unmodifiableSet(relationships);
 	}
@@ -97,32 +103,31 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
         final FlowFile flowFile = session.get();
         if (flowFile == null || flowFile.getSize() == 0) {
             return;
-        }
-		
-        final byte[] buffer = new byte[(int) flowFile.getSize()];
-        session.read(flowFile, new InputStreamCallback() {
-            @Override
-            public void process(final InputStream in) throws IOException {
-                StreamUtils.fillBuffer(in, buffer);
-            }
-        });
-        
-        String sessionId = livyController.get("sessionId").toString();
-        String livyUrl = livyController.get("livyUrl").toString();
-        String payload = "{\"code\":\""+flowFile.getAttribute("code")+"\"}";
-        JSONObject result = submitAndHandleJob(livyUrl,sessionId,payload);
-        
-        if(result==null){
-        	session.transfer(flowFile, REL_FAIL);
         }else{
-        	FlowFile resultFlowFile = session.write(flowFile, new OutputStreamCallback() {
-
-                @Override
-                public void process(OutputStream out) throws IOException {
-                    out.write(result.toString().getBytes());
-                }
-            });
-        	session.transfer(resultFlowFile, REL_SUCCESS);	
+        	final byte[] buffer = new byte[(int) flowFile.getSize()];
+        	session.read(flowFile, new InputStreamCallback() {
+        		@Override
+        		public void process(final InputStream in) throws IOException {
+        			StreamUtils.fillBuffer(in, buffer);
+        		}
+        	});
+        
+        	String sessionId = livyController.get("sessionId").toString();
+        	String livyUrl = livyController.get("livyUrl").toString();
+        	String payload = "{\"code\":\""+flowFile.getAttribute("code")+"\"}";
+        	JSONObject result = submitAndHandleJob(livyUrl,sessionId,payload);
+        
+        	if(result==null){
+        		session.transfer(flowFile, REL_FAIL);
+        	}else{
+        		FlowFile resultFlowFile = session.write(flowFile, new OutputStreamCallback() {
+                	public void process(OutputStream out) throws IOException {
+                		out.write(result.toString().getBytes());
+                	}
+        		});
+        		session.transfer(resultFlowFile, REL_SUCCESS);
+        		session.transfer(flowFile, REL_ORIGINAL);
+        	}
         }
 		//flowFile = session.putAllAttributes(flowFile, (Map<String, String>) new ArrayList());\
 	}

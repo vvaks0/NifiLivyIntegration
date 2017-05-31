@@ -172,18 +172,31 @@ public class LivySessionController extends AbstractControllerService implements 
 						//Keep track of how many sessions are in an idle state and thus available
 						idleSessions++;
 						sessions.put(sessionId,sessionsInfo.get(sessionId));
+						//Remove session from session list source of truth snapshot since it has been dealt with
+						sessionsInfo.remove(sessionId);
 					}else if(state.equalsIgnoreCase("busy")||state.equalsIgnoreCase("starting")){
 						//Update status of existing sessions
 						sessions.put(sessionId,sessionsInfo.get(sessionId));
+						//Remove session from session list source of truth snapshot since it has been dealt with
+						sessionsInfo.remove(sessionId);
 					}else{
 						//Prune sessions whose state is: not_started, shutting_down, error, dead, success (successfully stopped)
 						sessions.remove(sessionId);
+						//Remove session from session list source of truth snapshot since it has been dealt with
+						sessionsInfo.remove(sessionId);
 					}
 				}else{
 					//Prune sessions that no longer exist
 					sessions.remove(sessionId);
+					//Remove session from session list source of truth snapshot since it has been dealt with
+					sessionsInfo.remove(sessionId);
 				}
 			}
+			//Update Session Cache with any sessions that remain in the source of truth snapshot since they were not created by this thread
+			for(int sessionId: sessionsInfo.keySet()){
+				sessions.put(sessionId,sessionsInfo.get(sessionId));
+			}
+			
 			int numSessions = sessionsInfo.size();
 			//Open new sessions equal to the number requested by session_pool_size
 			if(numSessions==0){
