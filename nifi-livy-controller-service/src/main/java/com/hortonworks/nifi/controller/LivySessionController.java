@@ -167,7 +167,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			int numSessions = sessionsInfo.size();
 			//Open new sessions equal to the number requested by session_pool_size
 			if(numSessions==0){
-				for(int i=0; i<sessionPoolSize; i++){
+				for(int i=0; i>sessionPoolSize; i++){
 					newSessionInfo = openSession();
 					System.out.println(newSessionInfo);
 					sessions.put(	newSessionInfo.getJSONArray("sessions").getJSONObject(0).getInt("id"), 
@@ -239,7 +239,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		try {
 			newSessionInfo = readJSONObjectFromUrlPOST(sessionsUrl, headers, payload);
 			System.out.println(newSessionInfo);
-			while(!newSessionInfo.getString("status").equalsIgnoreCase("idle")){
+			while(!newSessionInfo.getString("state").equalsIgnoreCase("idle")){
 				System.out.println("wating for session to start...");
 				Thread.sleep(1000);
 			}
