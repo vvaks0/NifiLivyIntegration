@@ -188,7 +188,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			//Open new sessions equal to the number requested by session_pool_size
 			if(numSessions==0){
 				getLogger().debug("********** manageSessions() There are no available sessions, creating...");
-				for(int i=0; i>sessionPoolSize; i++){
+				for(int i=0; i<sessionPoolSize; i++){
 					newSessionInfo = openSession();
 					System.out.println(newSessionInfo);
 					sessions.put(	newSessionInfo.getJSONArray("sessions").getJSONObject(0).getInt("id"), 
