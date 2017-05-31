@@ -242,7 +242,8 @@ public class LivySessionController extends AbstractControllerService implements 
 		try {
 			sessionsInfo = readJSONFromUrl(sessionsUrl, headers);
 			numSessions = sessionsInfo.getInt("total");
-			for(int i=0;i<=numSessions; i++){
+			for(int i=0;i<numSessions; i++){
+				getLogger().debug("********** manageSessions() Updated map of sessions: " + sessions);
 				int currentSessionId = sessionsInfo.getJSONArray("sessions").getJSONObject(i).getInt("id");
 				JSONObject currentSession = sessionsInfo.getJSONArray("sessions").getJSONObject(i);
 				sessionsMap.put(currentSessionId,currentSession);
