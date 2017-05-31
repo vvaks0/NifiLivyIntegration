@@ -246,6 +246,23 @@ public class LivySessionController extends AbstractControllerService implements 
 		return sessionsMap;
 	}
 	
+	private JSONObject getSessionInfo(int sessionId){
+		String sessionUrl = livyUrl+"/sessions/"+sessionId;
+		JSONObject sessionInfo = null;
+		Map<String,String> headers = new HashMap<String,String>();
+		headers.put("Content-Type", "application/json");
+		headers.put("X-Requested-By", "user");
+		try {
+			sessionInfo = readJSONFromUrl(sessionUrl, headers);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		return sessionInfo;
+	}
+	
 	private JSONObject openSession(){
 		String sessionsUrl = livyUrl+"/sessions";
 		String payload = "{\"kind\":\""+sessionKind+"\"}";
@@ -257,9 +274,10 @@ public class LivySessionController extends AbstractControllerService implements 
 		try {
 			newSessionInfo = readJSONObjectFromUrlPOST(sessionsUrl, headers, payload);
 			getLogger().debug("********** openSession() Created new sessions: " + newSessionInfo);
+			Thread.sleep(500);
 			while(!newSessionInfo.getString("state").equalsIgnoreCase("idle")){
 				getLogger().debug("********** openSession() Wating for session to start...");
-				newSessionInfo = readJSONObjectFromUrlPOST(sessionsUrl, headers, payload);
+				newSessionInfo = getSessionInfo(newSessionInfo.getInt("id"));
 				Thread.sleep(1000);
 			}
 		} catch (IOException e) {
