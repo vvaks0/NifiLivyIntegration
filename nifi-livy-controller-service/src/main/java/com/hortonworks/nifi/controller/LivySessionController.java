@@ -156,6 +156,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		int idleSessions=0;
 		JSONObject newSessionInfo = null;
 		Map<Integer,JSONObject> sessionsInfo = null;
+		Map<Integer,JSONObject> sessionsCopy = null;
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", "application/json");
 		headers.put("X-Requested-By", "user");
@@ -166,7 +167,8 @@ public class LivySessionController extends AbstractControllerService implements 
 			if(sessions.isEmpty()){
 				sessions = sessionsInfo;
 			}
-			for(int sessionId: sessions.keySet()){
+			sessionsCopy = sessions;
+			for(int sessionId: sessionsCopy.keySet()){
 				JSONObject currentSession = (JSONObject)sessions.get(sessionId);
 				if(sessionsInfo.containsKey(sessionId)){	
 					getLogger().debug("********** manageSessions() updating current session: " + currentSession);
