@@ -289,7 +289,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			newSessionInfo = readJSONObjectFromUrlPOST(sessionsUrl, headers, payload);
 			getLogger().debug("********** openSession() Created new sessions: " + newSessionInfo);
 			Thread.sleep(1000);
-			while(!newSessionInfo.getString("state").equalsIgnoreCase("idle")){
+			while(newSessionInfo.getString("state").equalsIgnoreCase("starting")){
 				getLogger().debug("********** openSession() Wating for session to start...");
 				newSessionInfo = getSessionInfo(newSessionInfo.getInt("id"));
 				getLogger().debug("********** openSession() newSessionInfo: " + newSessionInfo);
