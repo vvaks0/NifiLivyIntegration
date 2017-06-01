@@ -156,7 +156,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		return sessionMap;
 	}
 	
-	private synchronized void manageSessions(){
+	private void manageSessions(){
 		int idleSessions=0;
 		JSONObject newSessionInfo = null;
 		Map<Integer,JSONObject> sessionsInfo = null;
