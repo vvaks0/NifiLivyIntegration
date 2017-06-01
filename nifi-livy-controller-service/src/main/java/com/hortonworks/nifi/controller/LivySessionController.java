@@ -133,11 +133,13 @@ public class LivySessionController extends AbstractControllerService implements 
 	}
 	
 	public Map<String,String> getSession(){
+		Map<Integer,JSONObject> sessionsCopy = new HashMap<Integer,JSONObject>();
 		Map<String,String> sessionMap = new HashMap<String,String>();
 		getLogger().debug("********** getSession() Aquiring session...");
 		getLogger().debug("********** getSession() Session Cache: " + sessions);
+		sessionsCopy = sessions;
 		try {
-			for(int sessionId: sessions.keySet()){
+			for(int sessionId: sessionsCopy.keySet()){
 				JSONObject currentSession = (JSONObject)sessions.get(sessionId);
 				String state = currentSession.getString("state");
 				if(state.equalsIgnoreCase("idle")){
@@ -156,7 +158,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		int idleSessions=0;
 		JSONObject newSessionInfo = null;
 		Map<Integer,JSONObject> sessionsInfo = null;
-		Map<Integer,JSONObject> sessionsCopy = null;
+		Map<Integer,JSONObject> sessionsCopy = new HashMap<Integer,JSONObject>();
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", "application/json");
 		headers.put("X-Requested-By", "user");
