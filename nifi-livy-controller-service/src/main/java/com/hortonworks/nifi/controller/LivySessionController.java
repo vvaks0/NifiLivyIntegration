@@ -118,7 +118,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		sessionKind = session_kind;
 		sessionPoolSize = Integer.valueOf(session_pool_size);
 		
-		new Thread(new Runnable() {
+		Thread livySessionManagerThread = new Thread(new Runnable() {
 	        public void run(){
 	            while(true){
 	            	manageSessions();
@@ -129,7 +129,9 @@ public class LivySessionController extends AbstractControllerService implements 
 					}
 	            }
 	        }
-	    }).start();
+	    });
+		livySessionManagerThread.setName("Livy-Session-Manager");
+		livySessionManagerThread.start();
 	}
 	
 	public Map<String,String> getSession(){
