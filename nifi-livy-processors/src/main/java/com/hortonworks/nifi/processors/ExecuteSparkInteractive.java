@@ -1,6 +1,5 @@
 package com.hortonworks.nifi.processors;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +9,7 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,10 +32,7 @@ import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.io.InputStreamCallback;
 import org.apache.nifi.processor.io.OutputStreamCallback;
 import org.apache.nifi.stream.io.StreamUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -44,7 +40,7 @@ import com.hortonworks.nifi.controller.api.LivySessionService;
 
 @SideEffectFree
 @Tags({"Spark","Livy","HTTP"})
-@CapabilityDescription("Sends events to Apache Druid for Indexing")
+@CapabilityDescription("Execute Spark Code over a Livy managed HTTP session to a live Spark context. Supports cached RDD sharing.")
 public class ExecuteSparkInteractive extends AbstractProcessor {
 	private List<PropertyDescriptor> properties;
 	private Set<Relationship> relationships;

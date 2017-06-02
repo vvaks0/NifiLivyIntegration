@@ -173,10 +173,10 @@ public class LivySessionController extends AbstractControllerService implements 
 				sessions = sessionsInfo;
 			}
 			//sessionsCopy = sessions;
-			//Iterator<Integer> sessionIterator = sessions.keySet().iterator();
-			for(int sessionId: sessions.keySet()){
-			//while(sessionIterator.hasNext()){
-				//int sessionId = sessionIterator.next();
+			Iterator<Integer> sessionIterator = new ArrayList<>(sessions.keySet()).iterator();
+			//for(int sessionId: sessions.keySet()){
+			while(sessionIterator.hasNext()){
+				int sessionId = sessionIterator.next();
 				JSONObject currentSession = (JSONObject)sessions.get(sessionId);
 				if(sessionsInfo.containsKey(sessionId)){	
 					getLogger().debug("********** manageSessions() updating current session: " + currentSession);
