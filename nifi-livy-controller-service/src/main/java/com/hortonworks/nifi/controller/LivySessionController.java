@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
 import org.apache.nifi.annotation.documentation.Tags;
@@ -37,7 +38,7 @@ public class LivySessionController extends AbstractControllerService implements 
 	private String livyUrl;
 	private int sessionPoolSize;
 	private String sessionKind;
-	private Map<Integer, JSONObject> sessions = new HashMap<Integer,JSONObject>();
+	private Map<Integer, JSONObject> sessions = new ConcurrentHashMap<Integer,JSONObject>();
     
 	public static final PropertyDescriptor LIVY_HOST = new PropertyDescriptor.Builder()
             .name("livy_host")
@@ -172,10 +173,10 @@ public class LivySessionController extends AbstractControllerService implements 
 				sessions = sessionsInfo;
 			}
 			//sessionsCopy = sessions;
-			Iterator<Integer> sessionIterator = sessions.keySet().iterator();
-			//for(int sessionId: sessionsCopy.keySet()){
-			while(sessionIterator.hasNext()){
-				int sessionId = sessionIterator.next();
+			//Iterator<Integer> sessionIterator = sessions.keySet().iterator();
+			for(int sessionId: sessions.keySet()){
+			//while(sessionIterator.hasNext()){
+				//int sessionId = sessionIterator.next();
 				JSONObject currentSession = (JSONObject)sessions.get(sessionId);
 				if(sessionsInfo.containsKey(sessionId)){	
 					getLogger().debug("********** manageSessions() updating current session: " + currentSession);
