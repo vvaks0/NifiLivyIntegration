@@ -111,7 +111,14 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
         
         	String sessionId = livyController.get("sessionId").toString();
         	String livyUrl = livyController.get("livyUrl").toString();
-        	String payload = "{\"code\":\""+flowFile.getAttribute("code")+"\"}";
+        	if(flowFile.getAttribute("prefetch").equalsIgnoreCase("true") && flowFile.getAttribute("prefetchCode")!=null){
+        		String prefetchCode = flowFile.getAttribute("prefetchCode");
+    			String preFetchPayload = "{\"code\":\""+prefetchCode+"\"}";
+        		JSONObject preFetchResult = submitAndHandleJob(livyUrl,sessionId,preFetchPayload);
+                getLogger().debug("********** ExecuteSparkInteractive Resutl of Prefetch: " + preFetchResult);
+        	}
+        	String code = flowFile.getAttribute("code");
+        	String payload = "{\"code\":\""+code+"\"}";
         	JSONObject result = submitAndHandleJob(livyUrl,sessionId,payload);
         	getLogger().debug("********** ExecuteSparkInteractive Resutl of Job Submit: " + result);
         	if(result==null){
