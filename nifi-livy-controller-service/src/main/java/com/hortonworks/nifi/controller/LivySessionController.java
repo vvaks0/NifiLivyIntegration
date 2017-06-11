@@ -37,7 +37,7 @@ import com.hortonworks.nifi.controller.api.LivySessionService;
 public class LivySessionController extends AbstractControllerService implements LivySessionService{	
 	private String livyUrl;
 	private int sessionPoolSize;
-	private String sessionKind;
+	private String controllerKind;
 	private Map<Integer, JSONObject> sessions = new ConcurrentHashMap<Integer,JSONObject>();
     
 	public static final PropertyDescriptor LIVY_HOST = new PropertyDescriptor.Builder()
@@ -116,7 +116,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		final String files  = context.getProperty(FILES).getValue();
 		
 		livyUrl = "http://"+livyHost+":"+livyPort;
-		sessionKind = session_kind;
+		controllerKind = session_kind;
 		sessionPoolSize = Integer.valueOf(session_pool_size);
 		
 		Thread livySessionManagerThread = new Thread(new Runnable() {
@@ -259,7 +259,10 @@ public class LivySessionController extends AbstractControllerService implements 
 				getLogger().debug("********** manageSessions() Updated map of sessions: " + sessions);
 				int currentSessionId = sessionsInfo.getJSONArray("sessions").getJSONObject(i).getInt("id");
 				JSONObject currentSession = sessionsInfo.getJSONArray("sessions").getJSONObject(i);
-				sessionsMap.put(currentSessionId,currentSession);
+				String sessionKind = currentSession.getJSONObject("kind").toString(); 
+				if(sessionKind.equalsIgnoreCase(controllerKind)){
+					sessionsMap.put(currentSessionId,currentSession);
+				}	
 			}	
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -289,7 +292,7 @@ public class LivySessionController extends AbstractControllerService implements 
 	
 	private JSONObject openSession(){
 		String sessionsUrl = livyUrl+"/sessions";
-		String payload = "{\"kind\":\""+sessionKind+"\"}";
+		String payload = "{\"kind\":\""+controllerKind+"\"}";
 		JSONObject newSessionInfo = null;
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", "application/json");
