@@ -183,22 +183,24 @@ public class LivySessionController extends AbstractControllerService implements 
 			while(sessionIterator.hasNext()){
 				int sessionId = sessionIterator.next();
 				JSONObject currentSession = (JSONObject)sessions.get(sessionId);
+				String sessionKind = currentSession.getJSONObject("kind").toString(); 
 				if(sessionsInfo.containsKey(sessionId)){	
 					getLogger().debug("********** manageSessions() updating current session: " + currentSession);
 					String state = currentSession.getString("state");
-					if(state.equalsIgnoreCase("idle")){
+					if(state.equalsIgnoreCase("idle") && sessionKind.equalsIgnoreCase(controllerKind)){
 						//Keep track of how many sessions are in an idle state and thus available
 						idleSessions++;
 						sessions.put(sessionId,sessionsInfo.get(sessionId));
 						//Remove session from session list source of truth snapshot since it has been dealt with
 						sessionsInfo.remove(sessionId);
-					}else if(state.equalsIgnoreCase("busy")||state.equalsIgnoreCase("starting")){
+					}else if((state.equalsIgnoreCase("busy")||state.equalsIgnoreCase("starting")) && sessionKind.equalsIgnoreCase(controllerKind)){
 						//Update status of existing sessions
 						sessions.put(sessionId,sessionsInfo.get(sessionId));
 						//Remove session from session list source of truth snapshot since it has been dealt with
 						sessionsInfo.remove(sessionId);
 					}else{
-						//Prune sessions whose state is: not_started, shutting_down, error, dead, success (successfully stopped)
+						//Prune sessions of kind != controllerKind and whose state is: 
+						//not_started, shutting_down, error, dead, success (successfully stopped)
 						sessions.remove(sessionId);
 						//Remove session from session list source of truth snapshot since it has been dealt with
 						sessionsInfo.remove(sessionId);
@@ -264,10 +266,7 @@ public class LivySessionController extends AbstractControllerService implements 
 				getLogger().debug("********** manageSessions() Updated map of sessions: " + sessions);
 				int currentSessionId = sessionsInfo.getJSONArray("sessions").getJSONObject(i).getInt("id");
 				JSONObject currentSession = sessionsInfo.getJSONArray("sessions").getJSONObject(i);
-				String sessionKind = currentSession.getJSONObject("kind").toString(); 
-				if(sessionKind.equalsIgnoreCase(controllerKind)){
-					sessionsMap.put(currentSessionId,currentSession);
-				}	
+				sessionsMap.put(currentSessionId,currentSession);	
 			}	
 		} catch (IOException e) {
 			e.printStackTrace();
