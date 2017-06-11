@@ -183,7 +183,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			while(sessionIterator.hasNext()){
 				int sessionId = sessionIterator.next();
 				JSONObject currentSession = (JSONObject)sessions.get(sessionId);
-				String sessionKind = currentSession.getJSONObject("kind").toString();
+				String sessionKind = currentSession.getString("kind");
 				getLogger().debug("********** manageSessions() current session: " + currentSession);
 				getLogger().debug("********** manageSessions() session kind: " + sessionKind);
 				getLogger().debug("********** manageSessions() controler kind: " + controllerKind);
@@ -266,7 +266,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		try {
 			sessionsInfo = readJSONFromUrl(sessionsUrl, headers);
 			numSessions = sessionsInfo.getJSONArray("sessions").length();
-			getLogger().debug("********** listSessions() Number of sessions: " + sessions);
+			getLogger().debug("********** listSessions() Number of sessions: " + numSessions);
 			for(int i=0;i<numSessions; i++){
 				getLogger().debug("********** listSessions() Updated map of sessions: " + sessions);
 				int currentSessionId = sessionsInfo.getJSONArray("sessions").getJSONObject(i).getInt("id");
