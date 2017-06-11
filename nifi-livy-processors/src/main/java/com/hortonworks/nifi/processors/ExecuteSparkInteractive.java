@@ -122,7 +122,7 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
         	}
         	String payload = "{\"code\":\""+code+"\"}";
         	JSONObject result = submitAndHandleJob(livyUrl,sessionId,payload);
-        	getLogger().debug("********** ExecuteSparkInteractive Resutl of Job Submit: " + result);
+        	getLogger().debug("********** ExecuteSparkInteractive Result of Job Submit: " + result);
         	if(result==null){
         		session.transfer(flowFile, REL_FAIL);
         	}else{
