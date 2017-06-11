@@ -131,8 +131,9 @@ public class LivySessionController extends AbstractControllerService implements 
 	            }
 	        }
 	    });
-		livySessionManagerThread.setName("Livy-Session-Manager");
+		livySessionManagerThread.setName("Livy-Session-Manager-"+controllerKind);
 		livySessionManagerThread.start();
+		Runtime.getRuntime().addShutdownHook(livySessionManagerThread);
 	}
 	
 	public Map<String,String> getSession(){
