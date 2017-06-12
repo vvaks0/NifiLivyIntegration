@@ -66,7 +66,7 @@ public class LivySessionController extends AbstractControllerService implements 
             .name("session_kind")
             .description("The kind of Spark session to start")
             .required(true)
-            .allowableValues("spark","pyspark","pyspark3","sparkr")
+            .allowableValues("spark","pyspark","pyspark3","sparkR")
             .defaultValue("spark")
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
@@ -150,7 +150,8 @@ public class LivySessionController extends AbstractControllerService implements 
 			for(int sessionId: sessionsCopy.keySet()){
 				JSONObject currentSession = (JSONObject)sessions.get(sessionId);
 				String state = currentSession.getString("state");
-				if(state.equalsIgnoreCase("idle")){
+				String sessionKind = currentSession.getString("kind");
+				if(state.equalsIgnoreCase("idle") && sessionKind.equalsIgnoreCase(controllerKind)){
 					sessionMap.put("sessionId",String.valueOf(sessionId));
 					sessionMap.put("livyUrl",livyUrl);
 				}
@@ -221,7 +222,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			}
 			
 			int numSessions = sessions.size();
-			getLogger().debug("********** manageSessions() There are " + numSessions+ " sessions in the pool, creating...");
+			getLogger().debug("********** manageSessions() There are " + numSessions+ " sessions in the pool");
 			//Open new sessions equal to the number requested by session_pool_size
 			if(numSessions==0){
 				getLogger().debug("********** manageSessions() There are " + numSessions+ " sessions in the pool, creating...");
