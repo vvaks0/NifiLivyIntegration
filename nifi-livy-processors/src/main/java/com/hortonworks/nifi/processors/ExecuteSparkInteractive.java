@@ -120,6 +120,8 @@ public class ExecuteSparkInteractive extends AbstractProcessor {
         		//JSONObject preFetchResult = submitAndHandleJob(livyUrl,sessionId,preFetchPayload);
                 //getLogger().debug("********** ExecuteSparkInteractive Result of Prefetch: " + preFetchResult);
         	}
+        	//replace all carriage returns and all new lines with a \n to make code string REST compatible
+        	code = code.replaceAll("(\\r|\\n|\\r\\n)+", "\\\\n");
         	String payload = "{\"code\":\""+code+"\"}";
         	JSONObject result = submitAndHandleJob(livyUrl,sessionId,payload);
         	getLogger().debug("********** ExecuteSparkInteractive Result of Job Submit: " + result);
