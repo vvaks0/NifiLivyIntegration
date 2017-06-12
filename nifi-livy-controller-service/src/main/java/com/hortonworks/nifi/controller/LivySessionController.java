@@ -122,14 +122,17 @@ public class LivySessionController extends AbstractControllerService implements 
 		sessionPoolSize = Integer.valueOf(session_pool_size);
 		
 		livySessionManagerThread = new Thread(new Runnable() {
-	        public void run(){
-	            while(!Thread.currentThread().isInterrupted()){
+			boolean interrupted = false;
+			public void run(){
+	        	while(!interrupted){
 	            	manageSessions();
 	            	try {
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
-						break;
+						getLogger().debug("********** "+Thread.currentThread().getName()
+										+ " run() Iterrupt Status: "+ Thread.currentThread().isInterrupted());
+						interrupted = true;
 					}
 	            }
 	        }
@@ -140,7 +143,12 @@ public class LivySessionController extends AbstractControllerService implements 
 	
 	@OnDisabled
     public void shutdown() {
-		livySessionManagerThread.interrupt();
+		try {
+			livySessionManagerThread.interrupt();
+			livySessionManagerThread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
     }
 	
 	public Map<String,String> getSession(){
