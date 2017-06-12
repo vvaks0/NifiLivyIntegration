@@ -146,6 +146,7 @@ public class LivySessionController extends AbstractControllerService implements 
     public void shutdown() {
 		try {
 			enabled = false;
+			livySessionManagerThread.interrupt();
 			livySessionManagerThread.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
