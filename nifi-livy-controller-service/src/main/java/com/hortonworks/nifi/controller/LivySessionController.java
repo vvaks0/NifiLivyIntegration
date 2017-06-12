@@ -198,42 +198,49 @@ public class LivySessionController extends AbstractControllerService implements 
 			while(sessionIterator.hasNext()){
 				int sessionId = sessionIterator.next();
 				JSONObject currentSession = (JSONObject)sessions.get(sessionId);
-				String sessionKind = currentSession.getString("kind");
-				getLogger().debug("********** manageSessions() current session: " + currentSession);
-				getLogger().debug("********** manageSessions() session kind: " + sessionKind);
-				getLogger().debug("********** manageSessions() controler kind: " + controllerKind);
+				getLogger().debug("********** manageSessions() Updating current session: " + currentSession);
 				if(sessionsInfo.containsKey(sessionId)){	
-					getLogger().debug("********** manageSessions() Updating current session: " + currentSession);
 					String state = currentSession.getString("state");
+					String sessionKind = currentSession.getString("kind");
+					getLogger().debug("********** manageSessions() controler kind: " + controllerKind);
+					getLogger().debug("********** manageSessions() session kind: " + sessionKind);
+					getLogger().debug("********** manageSessions() session state: " + state);
 					if(state.equalsIgnoreCase("idle") && sessionKind.equalsIgnoreCase(controllerKind)){
 						//Keep track of how many sessions are in an idle state and thus available
+						getLogger().debug("********** manageSessions() found " + state + " session of kind " + sessionKind);
 						idleSessions++;
+						getLogger().debug("********** manageSessions() storing session in session pool...");
 						sessions.put(sessionId,sessionsInfo.get(sessionId));
 						//Remove session from session list source of truth snapshot since it has been dealt with
 						sessionsInfo.remove(sessionId);
 					}else if((state.equalsIgnoreCase("busy")||state.equalsIgnoreCase("starting")) && sessionKind.equalsIgnoreCase(controllerKind)){
 						//Update status of existing sessions
+						getLogger().debug("********** manageSessions() found " + state + " session of kind " + sessionKind);
+						getLogger().debug("********** manageSessions() storing session in session pool...");
 						sessions.put(sessionId,sessionsInfo.get(sessionId));
 						//Remove session from session list source of truth snapshot since it has been dealt with
 						sessionsInfo.remove(sessionId);
 					}else{
 						//Prune sessions of kind != controllerKind and whose state is: 
 						//not_started, shutting_down, error, dead, success (successfully stopped)
+						getLogger().debug("********** manageSessions() found " + state + " session of kind " + sessionKind);
+						getLogger().debug("********** manageSessions() session is either of wrong kind or in an bad state...");
 						sessions.remove(sessionId);
 						//Remove session from session list source of truth snapshot since it has been dealt with
 						sessionsInfo.remove(sessionId);
 					}
 				}else{
 					//Prune sessions that no longer exist
+					getLogger().debug("********** manageSessions() session exists in session pool but not in source snapshot, removing from pool...");
 					sessions.remove(sessionId);
 					//Remove session from session list source of truth snapshot since it has been dealt with
 					sessionsInfo.remove(sessionId);
 				}
 			}
 			//Update Session Cache with any sessions that remain in the source of truth snapshot since they were not created by this thread
-			for(int sessionId: sessionsInfo.keySet()){
-				sessions.put(sessionId,sessionsInfo.get(sessionId));
-			}
+			//for(int sessionId: sessionsInfo.keySet()){
+			//	sessions.put(sessionId,sessionsInfo.get(sessionId));
+			//}
 			
 			int numSessions = sessions.size();
 			getLogger().debug("********** manageSessions() There are " + numSessions+ " sessions in the pool");
@@ -283,7 +290,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			numSessions = sessionsInfo.getJSONArray("sessions").length();
 			getLogger().debug("********** listSessions() Number of sessions: " + numSessions);
 			for(int i=0;i<numSessions; i++){
-				getLogger().debug("********** listSessions() Updated map of sessions: " + sessions);
+				getLogger().debug("********** listSessions() Updated map of sessions: " + sessionsMap);
 				int currentSessionId = sessionsInfo.getJSONArray("sessions").getJSONObject(i).getInt("id");
 				JSONObject currentSession = sessionsInfo.getJSONArray("sessions").getJSONObject(i);
 				sessionsMap.put(currentSessionId,currentSession);	
