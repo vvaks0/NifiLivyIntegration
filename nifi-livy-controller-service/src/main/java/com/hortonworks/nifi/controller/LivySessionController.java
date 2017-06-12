@@ -126,8 +126,8 @@ public class LivySessionController extends AbstractControllerService implements 
 		livySessionManagerThread = new Thread(new Runnable() {
 			public void run(){
 	        	while(enabled){
-	            	manageSessions();
 	            	try {
+	            		manageSessions();
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -175,7 +175,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		return sessionMap;
 	}
 	
-	private void manageSessions(){
+	private void manageSessions() throws InterruptedException{
 		int idleSessions=0;
 		JSONObject newSessionInfo = null;
 		Map<Integer,JSONObject> sessionsInfo = null;
@@ -313,7 +313,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		return sessionInfo;
 	}
 	
-	private JSONObject openSession(){
+	private JSONObject openSession() throws InterruptedException{
 		String sessionsUrl = livyUrl+"/sessions";
 		String payload = "{\"kind\":\""+controllerKind+"\"}";
 		JSONObject newSessionInfo = null;
@@ -334,8 +334,6 @@ public class LivySessionController extends AbstractControllerService implements 
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		
