@@ -213,6 +213,7 @@ public class LivySessionController extends AbstractControllerService implements 
 						sessions.put(sessionId,sessionsInfo.get(sessionId));
 						//Remove session from session list source of truth snapshot since it has been dealt with
 						sessionsInfo.remove(sessionId);
+						getLogger().debug("********** manageSessions() currently session pool looks like this: " + sessions);
 					}else if((state.equalsIgnoreCase("busy")||state.equalsIgnoreCase("starting")) && sessionKind.equalsIgnoreCase(controllerKind)){
 						//Update status of existing sessions
 						getLogger().debug("********** manageSessions() found " + state + " session of kind " + sessionKind);
@@ -220,6 +221,7 @@ public class LivySessionController extends AbstractControllerService implements 
 						sessions.put(sessionId,sessionsInfo.get(sessionId));
 						//Remove session from session list source of truth snapshot since it has been dealt with
 						sessionsInfo.remove(sessionId);
+						getLogger().debug("********** manageSessions() currently session pool looks like this: " + sessions);
 					}else{
 						//Prune sessions of kind != controllerKind and whose state is: 
 						//not_started, shutting_down, error, dead, success (successfully stopped)
@@ -228,6 +230,7 @@ public class LivySessionController extends AbstractControllerService implements 
 						sessions.remove(sessionId);
 						//Remove session from session list source of truth snapshot since it has been dealt with
 						sessionsInfo.remove(sessionId);
+						getLogger().debug("********** manageSessions() currently session pool looks like this: " + sessions);
 					}
 				}else{
 					//Prune sessions that no longer exist
@@ -235,13 +238,14 @@ public class LivySessionController extends AbstractControllerService implements 
 					sessions.remove(sessionId);
 					//Remove session from session list source of truth snapshot since it has been dealt with
 					sessionsInfo.remove(sessionId);
+					getLogger().debug("********** manageSessions() currently session pool looks like this: " + sessions);
 				}
 			}
 			//Update Session Cache with any sessions that remain in the source of truth snapshot since they were not created by this thread
 			//for(int sessionId: sessionsInfo.keySet()){
 			//	sessions.put(sessionId,sessionsInfo.get(sessionId));
 			//}
-			
+			getLogger().debug("********** manageSessions() currently session pool looks like this: " + sessions);
 			int numSessions = sessions.size();
 			getLogger().debug("********** manageSessions() There are " + numSessions+ " sessions in the pool");
 			//Open new sessions equal to the number requested by session_pool_size
