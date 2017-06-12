@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
 import org.apache.nifi.annotation.documentation.Tags;
+import org.apache.nifi.annotation.lifecycle.OnDisabled;
 import org.apache.nifi.annotation.lifecycle.OnEnabled;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.controller.AbstractControllerService;
@@ -39,6 +40,7 @@ public class LivySessionController extends AbstractControllerService implements 
 	private int sessionPoolSize;
 	private String controllerKind;
 	private Map<Integer, JSONObject> sessions = new ConcurrentHashMap<Integer,JSONObject>();
+	private Thread livySessionManagerThread = null;
     
 	public static final PropertyDescriptor LIVY_HOST = new PropertyDescriptor.Builder()
             .name("livy_host")
@@ -119,26 +121,27 @@ public class LivySessionController extends AbstractControllerService implements 
 		controllerKind = session_kind;
 		sessionPoolSize = Integer.valueOf(session_pool_size);
 		
-		Thread livySessionManagerThread = new Thread(new Runnable() {
+		livySessionManagerThread = new Thread(new Runnable() {
 	        public void run(){
-	            while(true){
+	            while(!Thread.currentThread().isInterrupted()){
 	            	manageSessions();
 	            	try {
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
+						break;
 					}
 	            }
 	        }
 	    });
 		livySessionManagerThread.setName("Livy-Session-Manager-"+controllerKind);
 		livySessionManagerThread.start();
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				livySessionManagerThread.interrupt();
-			}
-		});
 	}
+	
+	@OnDisabled
+    public void shutdown() {
+		livySessionManagerThread.interrupt();
+    }
 	
 	public Map<String,String> getSession(){
 		Map<Integer,JSONObject> sessionsCopy = new HashMap<Integer,JSONObject>();
