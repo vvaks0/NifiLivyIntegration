@@ -190,7 +190,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			sessionsInfo = listSessions();
 			if(sessions.isEmpty()){
 				getLogger().debug("********** manageSessions() the active session list is empty, populating from aquired list...");
-				sessions = sessionsInfo;
+				sessions.putAll(sessionsInfo);
 			}
 			//sessionsCopy = sessions;
 			Iterator<Integer> sessionIterator = new ArrayList<>(sessions.keySet()).iterator();
