@@ -41,6 +41,7 @@ public class LivySessionController extends AbstractControllerService implements 
 	private String controllerKind;
 	private Map<Integer, JSONObject> sessions = new ConcurrentHashMap<Integer,JSONObject>();
 	private Thread livySessionManagerThread = null;
+	private boolean enabled = true;
     
 	public static final PropertyDescriptor LIVY_HOST = new PropertyDescriptor.Builder()
             .name("livy_host")
@@ -122,9 +123,8 @@ public class LivySessionController extends AbstractControllerService implements 
 		sessionPoolSize = Integer.valueOf(session_pool_size);
 		
 		livySessionManagerThread = new Thread(new Runnable() {
-			boolean interrupted = false;
 			public void run(){
-	        	while(!interrupted){
+	        	while(enabled){
 	            	manageSessions();
 	            	try {
 						Thread.sleep(2000);
@@ -132,7 +132,7 @@ public class LivySessionController extends AbstractControllerService implements 
 						e.printStackTrace();
 						getLogger().debug("********** "+Thread.currentThread().getName()
 										+ " run() Iterrupt Status: "+ Thread.currentThread().isInterrupted());
-						interrupted = true;
+						enabled = false;
 					}
 	            }
 	        }
@@ -144,7 +144,7 @@ public class LivySessionController extends AbstractControllerService implements 
 	@OnDisabled
     public void shutdown() {
 		try {
-			livySessionManagerThread.interrupt();
+			enabled = false;
 			livySessionManagerThread.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -187,6 +187,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			getLogger().debug("********** manageSessions() aquiring list of sessions...");
 			sessionsInfo = listSessions();
 			if(sessions.isEmpty()){
+				getLogger().debug("********** manageSessions() the active session list is empty, populating from aquired list...");
 				sessions = sessionsInfo;
 			}
 			//sessionsCopy = sessions;
