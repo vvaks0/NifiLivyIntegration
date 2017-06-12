@@ -121,6 +121,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		livyUrl = "http://"+livyHost+":"+livyPort;
 		controllerKind = session_kind;
 		sessionPoolSize = Integer.valueOf(session_pool_size);
+		enabled = true;
 		
 		livySessionManagerThread = new Thread(new Runnable() {
 			public void run(){
