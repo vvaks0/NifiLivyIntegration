@@ -69,7 +69,7 @@ public class LivySessionController extends AbstractControllerService implements 
             .name("session_kind")
             .description("The kind of Spark session to start")
             .required(true)
-            .allowableValues("spark","pyspark","pyspark3","sparkR")
+            .allowableValues("spark","pyspark","pyspark3","sparkr")
             .defaultValue("spark")
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
