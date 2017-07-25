@@ -335,6 +335,7 @@ public class LivySessionController extends AbstractControllerService implements 
 			ObjectMapper mapper = new ObjectMapper();
 			String jarsJsonArray = mapper.writeValueAsString(jarsArray);
 			String payload = "{\"kind\":\""+controllerKind+"\",\"jars\":"+jarsJsonArray+"}";
+			getLogger().debug("********** openSession() Session Payload: " + payload);
 			Map<String,String> headers = new HashMap<String,String>();
 			headers.put("Content-Type", "application/json");
 			headers.put("X-Requested-By", "user");
@@ -351,6 +352,8 @@ public class LivySessionController extends AbstractControllerService implements 
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
