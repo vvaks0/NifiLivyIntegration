@@ -26,7 +26,7 @@ import org.apache.nifi.controller.AbstractControllerService;
 import org.apache.nifi.controller.ConfigurationContext;
 import org.apache.nifi.processor.util.StandardValidators;
 import org.apache.nifi.reporting.InitializationException;
-
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -328,14 +328,17 @@ public class LivySessionController extends AbstractControllerService implements 
 	}
 	
 	private JSONObject openSession() throws InterruptedException{
-		String sessionsUrl = livyUrl+"/sessions";
-		String payload = "{\"kind\":\""+controllerKind+"\",\"jars\":\""+jars+"\"}";
 		JSONObject newSessionInfo = null;
-		Map<String,String> headers = new HashMap<String,String>();
-		headers.put("Content-Type", "application/json");
-		headers.put("X-Requested-By", "user");
-		
 		try {
+			String sessionsUrl = livyUrl+"/sessions";
+			String[] jarsArray = jars.split(",");
+			ObjectMapper mapper = new ObjectMapper();
+			String jarsJsonArray = mapper.writeValueAsString(jarsArray);
+			String payload = "{\"kind\":\""+controllerKind+"\",\"jars\":"+jarsJsonArray+"}";
+			Map<String,String> headers = new HashMap<String,String>();
+			headers.put("Content-Type", "application/json");
+			headers.put("X-Requested-By", "user");
+		
 			newSessionInfo = readJSONObjectFromUrlPOST(sessionsUrl, headers, payload);
 			getLogger().debug("********** openSession() Created new sessions: " + newSessionInfo);
 			Thread.sleep(1000);
