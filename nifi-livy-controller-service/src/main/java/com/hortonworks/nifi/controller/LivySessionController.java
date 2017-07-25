@@ -39,6 +39,7 @@ public class LivySessionController extends AbstractControllerService implements 
 	private String livyUrl;
 	private int sessionPoolSize;
 	private String controllerKind;
+	private String jars;
 	private Map<Integer, JSONObject> sessions = new ConcurrentHashMap<Integer,JSONObject>();
 	private Thread livySessionManagerThread = null;
 	private boolean enabled = true;
@@ -78,7 +79,7 @@ public class LivySessionController extends AbstractControllerService implements 
             .name("jars")
             .description("JARs to be used in the Spark session.")
             .required(false)
-            //.addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .addValidator((new StandardValidators.FileExistsValidator(true)))
             .build();
 	
 	public static final PropertyDescriptor FILES = new PropertyDescriptor.Builder()
@@ -118,10 +119,11 @@ public class LivySessionController extends AbstractControllerService implements 
 		final String jars = context.getProperty(JARS).getValue();
 		final String files  = context.getProperty(FILES).getValue();
 		
-		livyUrl = "http://"+livyHost+":"+livyPort;
-		controllerKind = session_kind;
-		sessionPoolSize = Integer.valueOf(session_pool_size);
-		enabled = true;
+		this.livyUrl = "http://"+livyHost+":"+livyPort;
+		this.controllerKind = session_kind;
+		this.jars = jars;
+		this.sessionPoolSize = Integer.valueOf(session_pool_size);
+		this.enabled = true;
 		
 		livySessionManagerThread = new Thread(new Runnable() {
 			public void run(){
@@ -327,7 +329,7 @@ public class LivySessionController extends AbstractControllerService implements 
 	
 	private JSONObject openSession() throws InterruptedException{
 		String sessionsUrl = livyUrl+"/sessions";
-		String payload = "{\"kind\":\""+controllerKind+"\"}";
+		String payload = "{\"kind\":\""+controllerKind+"\",\"jars\":\""+jars+"\"}";
 		JSONObject newSessionInfo = null;
 		Map<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", "application/json");
