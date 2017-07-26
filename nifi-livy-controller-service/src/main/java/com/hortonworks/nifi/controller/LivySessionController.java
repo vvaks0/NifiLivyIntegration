@@ -79,14 +79,16 @@ public class LivySessionController extends AbstractControllerService implements 
             .name("jars")
             .description("JARs to be used in the Spark session.")
             .required(false)
-            .addValidator((new StandardValidators.FileExistsValidator(true)))
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .defaultValue(null)
             .build();
 	
 	public static final PropertyDescriptor FILES = new PropertyDescriptor.Builder()
             .name("files")
             .description("Files to be used in the Spark session.")
             .required(false)
-            //.addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .defaultValue(null)
             .build();
 	
 	private static final List<PropertyDescriptor> properties;
