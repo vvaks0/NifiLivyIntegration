@@ -332,7 +332,7 @@ public class LivySessionController extends AbstractControllerService implements 
 		try {
 			String sessionsUrl = livyUrl+"/sessions";
 			String payload = null;
-			if(!jars.isEmpty() && jars != null){
+			if(jars != null){
 				String[] jarsArray = jars.split(",");
 				ObjectMapper mapper = new ObjectMapper();
 				String jarsJsonArray = mapper.writeValueAsString(jarsArray);
