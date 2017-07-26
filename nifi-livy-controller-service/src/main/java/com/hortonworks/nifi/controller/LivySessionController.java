@@ -331,10 +331,15 @@ public class LivySessionController extends AbstractControllerService implements 
 		JSONObject newSessionInfo = null;
 		try {
 			String sessionsUrl = livyUrl+"/sessions";
-			String[] jarsArray = jars.split(",");
-			ObjectMapper mapper = new ObjectMapper();
-			String jarsJsonArray = mapper.writeValueAsString(jarsArray);
-			String payload = "{\"kind\":\""+controllerKind+"\",\"jars\":"+jarsJsonArray+"}";
+			String payload = null;
+			if(!jars.isEmpty() && jars != null){
+				String[] jarsArray = jars.split(",");
+				ObjectMapper mapper = new ObjectMapper();
+				String jarsJsonArray = mapper.writeValueAsString(jarsArray);
+				payload = "{\"kind\":\""+controllerKind+"\",\"jars\":"+jarsJsonArray+"}";
+			}else{
+				payload = "{\"kind\":\""+controllerKind+"\"}";
+			}
 			getLogger().debug("********** openSession() Session Payload: " + payload);
 			Map<String,String> headers = new HashMap<String,String>();
 			headers.put("Content-Type", "application/json");
